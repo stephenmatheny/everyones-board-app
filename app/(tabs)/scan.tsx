@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { addToCollection } from "../../src/api/collection";
 
@@ -11,11 +11,31 @@ export default function ScanScreen() {
   const [lastCode, setLastCode] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    scannedRef.current = false;
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      // Screen became active again → allow scanning
+      scannedRef.current = false;
+      setBusy(false);
+      setErr(null);
+      setLastCode(null);
 
-  async function handleBarcode({ data }: { data: string }) {
+      return () => {
+        // optional: also reset when leaving
+        scannedRef.current = false;
+      };
+    }, [])
+  );
+
+
+  async function handleBarcode({
+    data,
+    type,
+  }: {
+    data: string;
+    type: string;
+  }) {
+    console.log("SCANNED:", { type, data });
+    
     if (busy || scannedRef.current) return;
 
     scannedRef.current = true;
