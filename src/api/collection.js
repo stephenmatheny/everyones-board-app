@@ -1,6 +1,6 @@
 import { api } from "./client";
 
-export async function addToCollection({ barcode, name }) {
+export async function addToCollection({ barcode, name = null }) {
   const res = await api.post("/collection/add", {
     barcode,
     name: name || null,
